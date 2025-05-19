@@ -28,34 +28,59 @@ async function loadFiles(files) {
 
   const vectorStore = await HNSWLib.fromDocuments([], embeddings);
 
-  for (const file of files) {
-    const loader = new JSONLoader(
-      file,
-      [
-        "/type",
-        "/contig",
-        "/start",
-        "/stop",
-        "/strand",
-        "/frame",
-        "/gene",
-        "/product",
-        "/db_xrefs",
-        "/aa_hexdigest",
-        "/start_type",
-        "/rbs_motif",
-        "/ups",
-        "/ips",
-        "/psc",
-        "/pscc",
-        "/genes",
-        "/id",
-        "/locus",
-      ]
-    );
-    const docs = await loader.load();
-    vectorStore.addDocuments(docs);
-  }
+  const document1 = {
+    pageContent: "The powerhouse of the cell is the mitochondria",
+    metadata: { source: "https://example.com" },
+  };
+
+  const document2 = {
+    pageContent: "Buildings are made out of brick",
+    metadata: { source: "https://example.com" },
+  };
+
+  const document3 = {
+    pageContent: "Mitochondria are made out of lipids",
+    metadata: { source: "https://example.com" },
+  };
+
+  const document4 = {
+    pageContent: "The 2024 Olympics are in Paris",
+    metadata: { source: "https://example.com" },
+  };
+
+  const documents = [document1, document2, document3, document4];
+
+  await vectorStore.addDocuments(documents);
+
+  // for (const file of files) {
+  //   const loader = new JSONLoader(
+  //     file,
+  //     [
+  //       "/type",
+  //       "/contig",
+  //       "/start",
+  //       "/stop",
+  //       "/strand",
+  //       "/frame",
+  //       "/gene",
+  //       "/product",
+  //       "/db_xrefs",
+  //       "/aa_hexdigest",
+  //       "/start_type",
+  //       "/rbs_motif",
+  //       "/ups",
+  //       "/ips",
+  //       "/psc",
+  //       "/pscc",
+  //       "/genes",
+  //       "/id",
+  //       "/locus",
+  //     ]
+  //   );
+  //   const docs = await loader.load();
+  //   console.log(docs)
+  //   vectorStore.addDocuments(docs);
+  // }
 
   return vectorStore;
 }
