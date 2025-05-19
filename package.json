@@ -1,0 +1,9 @@
+{
+  "dependencies": {
+    "@langchain/community": "^0.3.43",
+    "@langchain/openai": "^0.5.10",
+    "dotenv": "^16.5.0",
+    "filehound": "^1.17.6",
+    "langchain": "^0.3.26"
+  }
+}
