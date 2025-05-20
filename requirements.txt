@@ -1,0 +1,7 @@
+langchain
+langchain-community
+langchain-core
+langgraph
+langchain[openai]
+typing-extensions
+psycopg2-binary
