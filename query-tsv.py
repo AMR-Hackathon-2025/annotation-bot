@@ -9,13 +9,10 @@ from typing_extensions import TypedDict
 from langchain_community.tools.sql_database.tool import QuerySQLDatabaseTool
 from langgraph.graph import START, StateGraph
 
-if not os.environ.get("POSTGRES_TSV_URL"):
-  os.environ["POSTGRES_TSV_URL"] = getpass.getpass("Enter Postgres DB URL: ")
-
 if not os.environ.get("OPENAI_API_KEY"):
   os.environ["OPENAI_API_KEY"] = getpass.getpass("Enter API key for OpenAI: ")
 
-db = SQLDatabase.from_uri(os.environ.get("POSTGRES_TSV_URL"))
+db = SQLDatabase.from_uri("sqlite:///bakta-tsv-annotations.db")
 
 class State(TypedDict):
     question: str
