@@ -15,7 +15,7 @@ if not os.environ.get("POSTGRES_DB_URL"):
 if not os.environ.get("OPENAI_API_KEY"):
   os.environ["OPENAI_API_KEY"] = getpass.getpass("Enter API key for OpenAI: ")
 
-db = SQLDatabase.from_uri("")
+db = SQLDatabase.from_uri(os.environ.get("POSTGRES_DB_URL"))
 
 class State(TypedDict):
     question: str
@@ -28,7 +28,7 @@ llm = init_chat_model("gpt-4.1", model_provider="openai")
 system_message = """
 Given an input question, create a syntactically correct {dialect} query to run to help find the answer. Unless the user specifies in his question a specific number of examples they wish to obtain, always limit your query to at most {top_k} results. You can order the results by a relevant column to return the most interesting examples in the database.
 
-When the input question refers to a protein, find all the COG IDs in bacteria relating to that protein and create a query against these COG IDs in cog_id column in psc table.
+When the input question refers to a protein or binding proteins, find all the COG IDs in bacteria relating to that protein and create a query against these COG IDs in cog_id column in psc table.
 
 Never query for all the columns from a specific table, only ask for a the few relevant columns given the question.
 
