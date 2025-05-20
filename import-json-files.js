@@ -9,27 +9,27 @@ const readFile = promisify(fs.readFile);
 const pool = new Pool({
   user: 'postgres',
   host: 'localhost',
-  database: 'bakta_annotations',
-  password: 'your_password', // Replace with your actual password
+  database: 'bakta_annotations_all',
+  password: 'postgres', // Replace with your actual password
   port: 5432,
 });
 
 /**
  * Insert a feature and its related data into the database
  * @param {Object} feature - Feature object from JSON
- * @param {number} fileId - ID of the file in the database
+ * @param {number} genomeId - ID of the genome in the database
  * @param {Object} client - PostgreSQL client for transaction
  */
-async function insertFeature(feature, fileId, client) {
+async function insertFeature(feature, genomeId, client) {
   // Insert basic feature data
   const featureResult = await client.query(
     `INSERT INTO features 
-      (file_id, feature_id, type, contig, start, stop, strand, frame, gene, product, 
-       nt, aa, aa_hexdigest, start_type, rbs_motif, locus) 
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16) 
+      (genome_id, feature_id, type, contig, start, stop, strand, frame, gene, product, 
+       start_type, rbs_motif, locus) 
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) 
      RETURNING id`,
     [
-      fileId,
+      genomeId,
       feature.id || null,
       feature.type || null,
       feature.contig || null,
@@ -39,9 +39,6 @@ async function insertFeature(feature, fileId, client) {
       feature.frame || null,
       feature.gene || null,
       feature.product || null,
-      feature.nt || null,
-      feature.aa || null,
-      feature.aa_hexdigest || null,
       feature.start_type || null,
       feature.rbs_motif || null,
       feature.locus || null
@@ -194,35 +191,30 @@ async function processFile(filePath) {
     
     const client = await pool.connect();
     try {
-      await client.query('BEGIN');
+      // await client.query('BEGIN');
       
       // Insert file record first
       const fileName = path.basename(filePath);
       const fileResult = await client.query(
-        `INSERT INTO files (filename, filepath, file_metadata) 
-         VALUES ($1, $2, $3) 
+        `INSERT INTO genomes (filename) 
+         VALUES ($1) 
          RETURNING id`,
         [
-          fileName,
-          filePath,
-          JSON.stringify({
-            genome: jsonData.genome || {},
-            stats: jsonData.stats || {}
-          })
+          fileName
         ]
       );
       
-      const fileId = fileResult.rows[0].id;
+      const genomeId = fileResult.rows[0].id;
       
       // Insert all features from the file
       for (const feature of jsonData.features) {
-        await insertFeature(feature, fileId, client);
+        await insertFeature(feature, genomeId, client);
       }
       
-      await client.query('COMMIT');
+      // await client.query('COMMIT');
       console.log(`Successfully imported ${jsonData.features.length} features from ${filePath}`);
     } catch (err) {
-      await client.query('ROLLBACK');
+      // await client.query('ROLLBACK');
       console.error(`Error processing file ${filePath}:`, err);
     } finally {
       client.release();
@@ -243,8 +235,15 @@ async function processDirectory(dirPath) {
     
     console.log(`Found ${jsonFiles.length} JSON files to process`);
     
+    let promises = [];
     for (const file of jsonFiles) {
-      await processFile(path.join(dirPath, file));
+      promises.push(
+        processFile(path.join(dirPath, file))
+      );
+      if (promises.length >= 4) {
+        await Promise.all(promises);
+        promises = [];
+      }
     }
     
     console.log('Finished processing all files');
