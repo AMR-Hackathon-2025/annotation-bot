@@ -31,7 +31,7 @@ if (!fs.existsSync(folderPath) || !fs.lstatSync(folderPath).isDirectory()) {
 
 // Database configuration - update with your credentials
 const pool = new Pool({
-  connectionString: process.env.POSTGRES_DB_URL || 'postgres://username:password@localhost:5432/gff_annotations',
+  connectionString: process.env.POSTGRES_DB_URL || 'postgres://postgres:postgres@localhost:5432/gff_annotations',
 });
 
 // Function to check if a file is a GFF file
