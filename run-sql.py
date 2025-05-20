@@ -49,7 +49,7 @@ def run_sql_file(connection_string, sql_file_path):
             conn.close()
 
 if __name__ == "__main__":
-    if len(sys.argv) != 2:
+    if len(sys.argv) != 3:
         print("Usage: python run_sql.py <sql_file_path>")
         sys.exit(1)
     
